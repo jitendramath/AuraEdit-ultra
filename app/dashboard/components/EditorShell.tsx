@@ -1,145 +1,90 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import CreateProject from "./CreateProject";
+import ProgressPopup from "./ProgressPopup";
+import StatusBar from "./StatusBar";
+import FileTree from "./FileTree";
 
 export default function EditorShell() {
-
-  const [status, setStatus] = useState<"idle" | "building" | "done">("idle");
-
-  useEffect(() => {
-
-    // Placeholder: future AI orchestration hook
-
-    // For now, shell is fully functional
-
-  }, []);
-
   return (
-
     <div
-
       style={{
-
         flex: 1,
-
         display: "flex",
-
         flexDirection: "column",
-
-        height: "100%",
-
-        width: "100%"
-
+        height: "100vh",
+        background: "var(--bg-main)"
       }}
-
     >
-
       {/* Top Bar */}
-
       <header
-
         style={{
-
           height: "52px",
-
           display: "flex",
-
           alignItems: "center",
-
           justifyContent: "space-between",
-
           padding: "0 1rem",
-
           background: "var(--bg-panel)",
-
           borderBottom: "1px solid var(--border-color)"
-
         }}
-
       >
-
         <strong>AuraEdit Workspace</strong>
-
-        <span style={{ fontSize: "0.85rem", color: "var(--text-secondary)" }}>
-
-          Status: {status}
-
+        <span
+          style={{
+            fontSize: "0.85rem",
+            color: "var(--text-secondary)"
+          }}
+        >
+          Status: idle
         </span>
-
       </header>
 
-      {/* Body */}
-
+      {/* Main Body */}
       <div
-
         style={{
-
           flex: 1,
-
           display: "flex",
-
           overflow: "hidden"
-
         }}
-
       >
-
         {/* File Tree */}
-
         <aside
-
           style={{
-
             width: "260px",
-
             background: "var(--bg-panel)",
-
             borderRight: "1px solid var(--border-color)",
-
-            padding: "1rem",
-
-            fontSize: "0.9rem",
-
-            color: "var(--text-secondary)"
-
+            padding: "1rem"
           }}
-
         >
-
-          File Tree
-
+          <h4
+            style={{
+              fontSize: "0.8rem",
+              marginBottom: "0.75rem",
+              color: "var(--text-secondary)"
+            }}
+          >
+            File Tree
+          </h4>
+          <FileTree />
         </aside>
 
         {/* Editor Area */}
-
         <section
-
           style={{
-
             flex: 1,
-
-            background: "var(--bg-main)",
-
-            display: "flex",
-
-            alignItems: "center",
-
-            justifyContent: "center",
-
-            color: "var(--text-secondary)"
-
+            overflowY: "auto",
+            padding: "1rem"
           }}
-
         >
-
-          Editor Area
-
+          <CreateProject />
         </section>
-
       </div>
 
+      {/* Bottom Status Bar */}
+      <StatusBar />
+
+      {/* Global Progress Popup */}
+      <ProgressPopup />
     </div>
-
   );
-
 }
