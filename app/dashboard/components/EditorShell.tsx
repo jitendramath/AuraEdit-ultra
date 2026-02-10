@@ -1,11 +1,15 @@
 "use client";
 
+import { useState } from "react";
 import CreateProject from "./CreateProject";
 import ProgressPopup from "./ProgressPopup";
 import StatusBar from "./StatusBar";
 import FileTree from "./FileTree";
+import EditorPreview from "./EditorPreview";
 
 export default function EditorShell() {
+  const [selectedFile, setSelectedFile] = useState<string | null>(null);
+
   return (
     <div
       style={{
@@ -35,7 +39,7 @@ export default function EditorShell() {
             color: "var(--text-secondary)"
           }}
         >
-          Status: idle
+          Status: active
         </span>
       </header>
 
@@ -65,7 +69,8 @@ export default function EditorShell() {
           >
             File Tree
           </h4>
-          <FileTree />
+
+          <FileTree onSelect={setSelectedFile} />
         </aside>
 
         {/* Editor Area */}
@@ -76,7 +81,11 @@ export default function EditorShell() {
             padding: "1rem"
           }}
         >
-          <CreateProject />
+          {selectedFile ? (
+            <EditorPreview filePath={selectedFile} />
+          ) : (
+            <CreateProject />
+          )}
         </section>
       </div>
 
