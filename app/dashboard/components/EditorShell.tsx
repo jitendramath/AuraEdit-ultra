@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 
+import dynamic from "next/dynamic";
+
 import MobileShell from "@/app/dashboard/components/MobileShell";
 import MobileHeader from "@/app/dashboard/components/MobileHeader";
 import MobileDrawer from "@/app/dashboard/components/MobileDrawer";
@@ -9,7 +11,12 @@ import MobileStatusBar from "@/app/dashboard/components/MobileStatusBar";
 
 import FileTree from "@/app/dashboard/components/FileTree";
 import EditorPreview from "@/app/dashboard/components/EditorPreview";
-import CreateProject from "@/app/dashboard/components/CreateProject";
+
+// 🔥 FORCE CreateProject AS CLIENT COMPONENT
+const CreateProject = dynamic(
+  () => import("@/app/dashboard/components/CreateProject"),
+  { ssr: false }
+);
 
 export default function EditorShell() {
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -18,7 +25,6 @@ export default function EditorShell() {
     "idle" | "initializing" | "building" | "completed" | "failed"
   >("idle");
 
-  // NOTE: demo values for now (can be wired to runtimeState later)
   const completedFiles = status === "building" ? 1 : 0;
   const totalFiles = status === "building" ? 2 : 0;
 
@@ -31,7 +37,7 @@ export default function EditorShell() {
         />
       }
     >
-      {/* Drawer: File Tree */}
+      {/* Drawer */}
       <MobileDrawer
         open={drawerOpen}
         onClose={() => setDrawerOpen(false)}
@@ -45,7 +51,7 @@ export default function EditorShell() {
         />
       </MobileDrawer>
 
-      {/* Main Content */}
+      {/* Main */}
       <div style={{ paddingBottom: "56px" }}>
         {selectedFile ? (
           <EditorPreview filePath={selectedFile} />
@@ -59,7 +65,7 @@ export default function EditorShell() {
         )}
       </div>
 
-      {/* Bottom Status Bar */}
+      {/* Bottom Bar */}
       <MobileStatusBar
         status={status}
         completed={completedFiles}
