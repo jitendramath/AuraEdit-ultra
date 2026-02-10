@@ -2,34 +2,44 @@
 
 import { useState } from "react";
 
-export default function CreateProject() {
+type Props = {
+  onStartBuild?: () => void;
+  onBuildProgress?: () => void;
+  onBuildComplete?: () => void;
+  onBuildFail?: () => void;
+};
+
+export default function CreateProject({
+  onStartBuild,
+  onBuildProgress,
+  onBuildComplete,
+  onBuildFail
+}: Props) {
   const [idea, setIdea] = useState("");
   const [loading, setLoading] = useState(false);
 
-  async function handleCreate() {
-    if (!idea.trim()) {
-      alert("Please describe your app idea");
-      return;
-    }
+  async function startBuild() {
+    if (!idea.trim()) return;
 
     setLoading(true);
+    onStartBuild?.();
 
     try {
-      await fetch("/api/ai/orchestrate", {
+      onBuildProgress?.();
+
+      const res = await fetch("/api/ai/orchestrate", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          projectName: "AuraEdit Project",
-          appGoal: idea,
-          techStack: "Next.js 14, TypeScript",
-          folderTree: "AUTO_GENERATED",
-          files: []
-        })
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ idea })
       });
+
+      if (!res.ok) throw new Error("Build failed");
+
+      onBuildComplete?.();
+      setIdea("");
     } catch (err) {
-      alert("Failed to start AI build");
+      console.error(err);
+      onBuildFail?.();
     } finally {
       setLoading(false);
     }
@@ -38,61 +48,82 @@ export default function CreateProject() {
   return (
     <div
       style={{
-        maxWidth: "600px",
-        margin: "2rem auto",
-        background: "var(--bg-panel)",
-        border: "1px solid var(--border-color)",
-        borderRadius: "12px",
-        padding: "1.5rem"
+        display: "flex",
+        flexDirection: "column",
+        height: "100%",
+        justifyContent: "space-between"
       }}
     >
-      <h2 style={{ marginBottom: "0.75rem" }}>
-        Create New Project
-      </h2>
+      {/* Top content */}
+      <div>
+        <h2
+          style={{
+            fontSize: "18px",
+            fontWeight: 600,
+            marginBottom: "6px"
+          }}
+        >
+          Create New Project
+        </h2>
 
-      <p
+        <p
+          style={{
+            fontSize: "13px",
+            color: "#94a3b8",
+            marginBottom: "14px"
+          }}
+        >
+          Describe what you want to build. AuraEdit will generate a complete
+          app file-by-file.
+        </p>
+
+        <textarea
+          value={idea}
+          onChange={(e) => setIdea(e.target.value)}
+          placeholder="Example: Mobile-first todo app with auth and offline support"
+          rows={6}
+          style={{
+            width: "100%",
+            resize: "none",
+            borderRadius: "14px",
+            padding: "12px",
+            background: "#020617",
+            border: "1px solid #1e293b",
+            color: "#e5e7eb",
+            fontSize: "14px",
+            outline: "none"
+          }}
+        />
+      </div>
+
+      {/* Bottom CTA */}
+      <div
         style={{
-          fontSize: "0.9rem",
-          color: "var(--text-secondary)",
-          marginBottom: "1rem"
+          position: "sticky",
+          bottom: 0,
+          paddingTop: "14px",
+          background: "linear-gradient(to top, #0b0f19 60%, transparent)"
         }}
       >
-        Describe what you want to build. AuraEdit will generate
-        a complete app file-by-file.
-      </p>
-
-      <textarea
-        value={idea}
-        onChange={e => setIdea(e.target.value)}
-        placeholder="Example: Build a SaaS dashboard with auth, billing and admin panel"
-        style={{
-          width: "100%",
-          minHeight: "120px",
-          background: "var(--bg-main)",
-          color: "var(--text-primary)",
-          border: "1px solid var(--border-color)",
-          borderRadius: "8px",
-          padding: "0.75rem",
-          resize: "vertical"
-        }}
-      />
-
-      <button
-        onClick={handleCreate}
-        disabled={loading}
-        style={{
-          marginTop: "1rem",
-          padding: "0.6rem 1.2rem",
-          borderRadius: "8px",
-          background: "var(--accent)",
-          color: "#fff",
-          border: "none",
-          cursor: "pointer",
-          opacity: loading ? 0.7 : 1
-        }}
-      >
-        {loading ? "Starting AI…" : "Generate App"}
-      </button>
+        <button
+          onClick={startBuild}
+          disabled={loading || !idea.trim()}
+          style={{
+            width: "100%",
+            height: "48px",
+            borderRadius: "16px",
+            background: loading ? "#334155" : "#2563eb",
+            border: "none",
+            color: "#fff",
+            fontSize: "15px",
+            fontWeight: 600,
+            cursor: loading ? "default" : "pointer",
+            opacity: loading ? 0.8 : 1
+          }}
+        >
+          {loading ? "Building…" : "Generate App"}
+        </button>
+      </div>
     </div>
   );
 }
