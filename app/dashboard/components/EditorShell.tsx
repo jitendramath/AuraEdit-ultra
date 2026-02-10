@@ -1,99 +1,56 @@
 "use client";
 
 import { useState } from "react";
-import CreateProject from "./CreateProject";
-import ProgressPopup from "./ProgressPopup";
-import StatusBar from "./StatusBar";
-import FileTree from "./FileTree";
-import EditorPreview from "./EditorPreview";
+
+import MobileShell from "@/app/dashboard/components/MobileShell";
+import MobileHeader from "@/app/dashboard/components/MobileHeader";
+import MobileDrawer from "@/app/dashboard/components/MobileDrawer";
+
+import FileTree from "@/app/dashboard/components/FileTree";
+import EditorPreview from "@/app/dashboard/components/EditorPreview";
+import CreateProject from "@/app/dashboard/components/CreateProject";
 
 export default function EditorShell() {
+  const [drawerOpen, setDrawerOpen] = useState(false);
   const [selectedFile, setSelectedFile] = useState<string | null>(null);
+  const [status, setStatus] = useState<
+    "idle" | "initializing" | "building" | "completed" | "failed"
+  >("idle");
 
   return (
-    <div
-      style={{
-        flex: 1,
-        display: "flex",
-        flexDirection: "column",
-        height: "100vh",
-        background: "var(--bg-main)"
-      }}
+    <MobileShell
+      header={
+        <MobileHeader
+          status={status}
+          onMenuClick={() => setDrawerOpen(true)}
+        />
+      }
     >
-      {/* Top Bar */}
-      <header
-        style={{
-          height: "52px",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          padding: "0 1rem",
-          background: "var(--bg-panel)",
-          borderBottom: "1px solid var(--border-color)"
-        }}
+      {/* Drawer: File Tree */}
+      <MobileDrawer
+        open={drawerOpen}
+        onClose={() => setDrawerOpen(false)}
+        title="Project Files"
       >
-        <strong>AuraEdit Workspace</strong>
-        <span
-          style={{
-            fontSize: "0.85rem",
-            color: "var(--text-secondary)"
+        <FileTree
+          onSelect={(path) => {
+            setSelectedFile(path);
+            setDrawerOpen(false);
           }}
-        >
-          Status: active
-        </span>
-      </header>
+        />
+      </MobileDrawer>
 
-      {/* Main Body */}
-      <div
-        style={{
-          flex: 1,
-          display: "flex",
-          overflow: "hidden"
-        }}
-      >
-        {/* File Tree */}
-        <aside
-          style={{
-            width: "260px",
-            background: "var(--bg-panel)",
-            borderRight: "1px solid var(--border-color)",
-            padding: "1rem"
-          }}
-        >
-          <h4
-            style={{
-              fontSize: "0.8rem",
-              marginBottom: "0.75rem",
-              color: "var(--text-secondary)"
-            }}
-          >
-            File Tree
-          </h4>
-
-          <FileTree onSelect={setSelectedFile} />
-        </aside>
-
-        {/* Editor Area */}
-        <section
-          style={{
-            flex: 1,
-            overflowY: "auto",
-            padding: "1rem"
-          }}
-        >
-          {selectedFile ? (
-            <EditorPreview filePath={selectedFile} />
-          ) : (
-            <CreateProject />
-          )}
-        </section>
-      </div>
-
-      {/* Bottom Status Bar */}
-      <StatusBar />
-
-      {/* Global Progress Popup */}
-      <ProgressPopup />
-    </div>
+      {/* Main Content */}
+      {selectedFile ? (
+        <EditorPreview filePath={selectedFile} />
+      ) : (
+        <CreateProject
+          onStartBuild={() => setStatus("initializing")}
+          onBuildProgress={() => setStatus("building")}
+          onBuildComplete={() => setStatus("completed")}
+          onBuildFail={() => setStatus("failed")}
+        />
+      )}
+    </MobileShell>
   );
 }
