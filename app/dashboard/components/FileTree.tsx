@@ -2,110 +2,73 @@
 
 import { useEffect, useState } from "react";
 
-type FileNode = {
-
+type FileItem = {
   path: string;
-
 };
 
-export default function FileTree() {
+type Props = {
+  onSelect?: (path: string) => void;
+};
 
-  const [files, setFiles] = useState<FileNode[]>([]);
+export default function FileTree({ onSelect }: Props) {
+  const [files, setFiles] = useState<FileItem[]>([]);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    setLoading(true);
 
-    let active = true;
-
-    const fetchFiles = async () => {
-
-      try {
-
-        const res = await fetch("/api/project/files");
-
-        if (!res.ok) return;
-
-        const data = await res.json();
-
-        if (active) {
-
-          setFiles(data.files || []);
-
-        }
-
-      } catch {
-
-        // silent fail
-
-      }
-
-    };
-
-    fetchFiles();
-
-    const timer = setInterval(fetchFiles, 2000);
-
-    return () => {
-
-      active = false;
-
-      clearInterval(timer);
-
-    };
-
+    fetch("/api/project/status")
+      .then(res => res.json())
+      .then(data => {
+        const list =
+          (data?.completedFilesList || []).map((p: string) => ({
+            path: p
+          })) || [];
+        setFiles(list);
+      })
+      .finally(() => setLoading(false));
   }, []);
 
+  if (loading) {
+    return (
+      <div style={{ fontSize: "0.8rem", color: "var(--text-secondary)" }}>
+        Loading files…
+      </div>
+    );
+  }
+
+  if (!files.length) {
+    return (
+      <div style={{ fontSize: "0.8rem", color: "var(--text-secondary)" }}>
+        No files yet
+      </div>
+    );
+  }
+
   return (
-
-    <div
-
-      style={{
-
-        fontSize: "0.85rem",
-
-        color: "var(--text-secondary)",
-
-        overflowY: "auto"
-
-      }}
-
-    >
-
-      {files.length === 0 && (
-
-        <div>No files yet…</div>
-
-      )}
-
-      {files.map(file => (
-
-        <div
-
-          key={file.path}
-
+    <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
+      {files.map(f => (
+        <li
+          key={f.path}
+          onClick={() => onSelect?.(f.path)}
           style={{
-
-            padding: "0.25rem 0",
-
-            whiteSpace: "nowrap",
-
-            overflow: "hidden",
-
-            textOverflow: "ellipsis"
-
+            padding: "0.35rem 0.5rem",
+            borderRadius: "6px",
+            cursor: "pointer",
+            fontSize: "0.85rem"
           }}
-
-          title={file.path}
-
+          onMouseEnter={e =>
+            (e.currentTarget.style.background =
+              "var(--bg-hover)")
+          }
+          onMouseLeave={e =>
+            (e.currentTarget.style.background =
+              "transparent")
+          }
         >
-
-          {file.path}
-
-        </div>
-
+          {f.path}
+        </li>
       ))}
-
-    </div>
-
+    </ul>
   );
-
 }
