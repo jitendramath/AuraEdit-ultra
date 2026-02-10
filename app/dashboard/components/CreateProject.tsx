@@ -2,19 +2,19 @@
 
 import { useState } from "react";
 
-type Props = {
+export type CreateProjectProps = {
   onStartBuild?: () => void;
   onBuildProgress?: () => void;
   onBuildComplete?: () => void;
   onBuildFail?: () => void;
 };
 
-export default function CreateProject({
+const CreateProject = ({
   onStartBuild,
   onBuildProgress,
   onBuildComplete,
   onBuildFail
-}: Props) {
+}: CreateProjectProps) => {
   const [idea, setIdea] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -54,15 +54,9 @@ export default function CreateProject({
         justifyContent: "space-between"
       }}
     >
-      {/* Top content */}
+      {/* Top */}
       <div>
-        <h2
-          style={{
-            fontSize: "18px",
-            fontWeight: 600,
-            marginBottom: "6px"
-          }}
-        >
+        <h2 style={{ fontSize: "18px", fontWeight: 600, marginBottom: "6px" }}>
           Create New Project
         </h2>
 
@@ -74,13 +68,13 @@ export default function CreateProject({
           }}
         >
           Describe what you want to build. AuraEdit will generate a complete
-          app file-by-file.
+          mobile-first app.
         </p>
 
         <textarea
           value={idea}
           onChange={(e) => setIdea(e.target.value)}
-          placeholder="Example: Mobile-first todo app with auth and offline support"
+          placeholder="Example: Mobile-only code editor with AI file generation"
           rows={6}
           style={{
             width: "100%",
@@ -126,4 +120,6 @@ export default function CreateProject({
       </div>
     </div>
   );
-}
+};
+
+export default CreateProject;
